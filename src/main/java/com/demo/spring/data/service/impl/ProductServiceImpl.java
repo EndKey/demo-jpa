@@ -6,10 +6,14 @@ import com.demo.spring.data.repository.ProductRepository;
 import com.demo.spring.data.repository.ShopRepository;
 import com.demo.spring.data.service.ProductService;
 import com.demo.spring.data.web.model.request.product.CreateProductRequest;
+import com.demo.spring.data.web.model.request.product.FilterProductRequest;
 import com.demo.spring.data.web.model.request.product.UpdateProductRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -21,6 +25,7 @@ public class ProductServiceImpl implements ProductService {
     ShopRepository shopRepository;
 
     @Override
+    @Transactional(rollbackFor = { Exception.class })
     public Product create(CreateProductRequest request) {
         Shop shop = shopRepository.getById(request.getShopId());
 
@@ -30,11 +35,21 @@ public class ProductServiceImpl implements ProductService {
         BeanUtils.copyProperties(request, product);
 
         return productRepository.save(product);
+//        if (true) {
+//            throw new RuntimeException("Test Rollback");
+//        }
+//        else return null;// Untuk testing transaction.
+
     }
 
     @Override
     public Product findById(String id) {
         return productRepository.getById(id);
+    }
+
+    @Override
+    public Page<Product> findByFilter(FilterProductRequest request) {
+        return productRepository.findByFilter(request);
     }
 
     @Override
@@ -46,8 +61,7 @@ public class ProductServiceImpl implements ProductService {
             Shop shop = shopRepository.getById(shopId);
             product.setShop(shop);
         }
-        productRepository.save(product);
-        return product;
+        return productRepository.save(product);
     }
 
     @Override

@@ -38,4 +38,8 @@ public class Product {
     @JoinColumn(name = "shop_id")
     private Shop shop;
 
+    @Version
+    @Column
+    private Long version;
+
 }
